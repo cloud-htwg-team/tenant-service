@@ -30,6 +30,16 @@ object Starter extends App with JsonParser {
 
   val route = Route.seal(
     concat(
+      path("") {
+        get {
+          complete("Tenant microservice works! :)  - path: '/'")
+        }
+      },
+      path("tenant") {
+        get {
+          complete("Tenant microservice works! :)  - path: '/tenant'")
+        }
+      },
       path("tenant" / "test") {
         get {
           complete("Working!")

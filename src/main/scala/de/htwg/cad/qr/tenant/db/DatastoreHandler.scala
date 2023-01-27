@@ -10,8 +10,7 @@ private object DatastoreHandler {
   private val datastore = DatastoreOptions.getDefaultInstance.getService
   private val kind = "tenant"
 
-  def saveTenant(request: TenantCreationRequest): String = { // Instantiates a client
-    val id = UUID.randomUUID().toString
+  def saveTenant(request: TenantCreationRequest, id: String): String = {
     val taskKey = datastore.newKeyFactory.setKind(kind).newKey(id)
     val tenantInformation = Entity.newBuilder(taskKey)
       .set("tenantId", id)

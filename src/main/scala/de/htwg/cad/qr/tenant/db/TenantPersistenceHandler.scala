@@ -1,5 +1,6 @@
 package de.htwg.cad.qr.tenant.db
 
+import akka.actor.typed.ActorSystem
 import de.htwg.cad.qr.tenant.{TenantCreationRequest, TenantInformationFull, TenantInformationShort}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -12,5 +13,5 @@ trait TenantPersistenceHandler {
 }
 
 object TenantPersistenceHandler {
-  def cloud(implicit executionContext: ExecutionContext): TenantPersistenceHandler = new CloudPersistenceHandler
+  def cloud(implicit system: ActorSystem[Nothing], executionContext: ExecutionContext): TenantPersistenceHandler = new CloudPersistenceHandler
 }

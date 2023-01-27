@@ -1,19 +1,24 @@
 package de.htwg.cad.qr.tenant.db
 
+import akka.actor.typed.ActorSystem
 import de.htwg.cad.qr.tenant.{TenantCreationRequest, TenantInformationFull, TenantInformationShort}
 
-import java.util.{Base64, UUID}
+import java.util.Base64
 import scala.concurrent.{ExecutionContext, Future}
 
-private class CloudPersistenceHandler(implicit executionContext: ExecutionContext) extends TenantPersistenceHandler {
+private class CloudPersistenceHandler(implicit system: ActorSystem[Nothing], executionContext: ExecutionContext) extends TenantPersistenceHandler {
+  private val communication = new MicroserviceCommunicationHandler()
+
   override def getAllTenants: List[TenantInformationShort] =
     DatastoreHandler.listTenants()
 
   override def createTenant(request: TenantCreationRequest): Future[String] = {
-    // TODO store new tenant in Google Identity Platform (maybe get ID from there?)
-    Future(DatastoreHandler.saveTenant(request))
-      .flatMap(id => Future(GoogleBucketHandler.uploadObject(id, Base64.getDecoder.decode(request.logo)))
-        .map(_ => id))
+    communication.createTenant(request.name)
+      .flatMap(tenantId => {
+        val metaData = Future(DatastoreHandler.saveTenant(request, tenantId))
+        val logo = Future(GoogleBucketHandler.uploadObject(tenantId, Base64.getDecoder.decode(request.logo)))
+        metaData.flatMap(_ => logo).map(_ => tenantId)
+      })
   }
 
   override def getTenantInformation(tenantId: String): Future[TenantInformationFull] = {

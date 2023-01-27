@@ -11,9 +11,7 @@ import akka.http.scaladsl.server.{ExceptionHandler, Route}
 import de.htwg.cad.qr.tenant.db.TenantPersistenceHandler
 import spray.json.DefaultJsonProtocol._
 
-import java.util.Base64
 import scala.concurrent.ExecutionContextExecutor
-import scala.util.Try
 
 object Starter extends App with JsonParser {
   implicit val system: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "my-system")

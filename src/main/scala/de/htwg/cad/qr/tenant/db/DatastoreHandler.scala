@@ -3,11 +3,11 @@ package de.htwg.cad.qr.tenant.db
 import com.google.cloud.datastore._
 import de.htwg.cad.qr.tenant.{TenantCreationRequest, TenantInformationShort}
 
-import java.util.UUID
 import scala.jdk.CollectionConverters.IteratorHasAsScala
 
 private object DatastoreHandler {
-  private val datastore = DatastoreOptions.getDefaultInstance.getService
+  private val projectId = "qrcode"
+  private val datastore = DatastoreOptions.newBuilder.setProjectId(projectId).build.getService
   private val kind = "tenant"
 
   def saveTenant(request: TenantCreationRequest, id: String): String = {

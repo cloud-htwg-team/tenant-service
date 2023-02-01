@@ -29,13 +29,14 @@ RUN sbt assembly
 
 
 #FROM alpine
-FROM sapmachine:11
 
 #ENV JAVA_MINIMAL=/opt/jre
 #ENV PATH="$PATH:$JAVA_MINIMAL/bin"
 
-COPY --from=builder "/root/target/scala-2.13/tenant-service-assembly-0.1.jar" "/app.jar"
 #COPY --from=packager "$JAVA_MINIMAL" "$JAVA_MINIMAL"
+FROM sapmachine:11
+COPY --from=builder "/root/target/scala-2.13/tenant-service-assembly-0.1.jar" "/app.jar"
+COPY config/credentials /fotos/credentials
 
 EXPOSE 8888
 CMD [ "-jar", "/app.jar" ]

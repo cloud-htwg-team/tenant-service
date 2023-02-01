@@ -7,7 +7,7 @@ import de.htwg.cad.qr.tenant.{TenantCreationRequest, TenantInformationShort}
 import scala.jdk.CollectionConverters.IteratorHasAsScala
 
 private object DatastoreHandler {
-  private val projectId = "qrcode"
+  private val projectId = "qrcode-374515"
   private val datastore = DatastoreOptions.newBuilder.setProjectId(projectId).build.getService
   private val kind = "tenant"
 

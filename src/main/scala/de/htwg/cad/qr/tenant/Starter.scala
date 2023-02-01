@@ -56,18 +56,25 @@ object Starter extends App with JsonParser {
         )
       },
       pathPrefix("secure" / "tenants") {
-        pathPrefix(Segment) { tenantId =>
-          concat(
+        concat(
+          path("name" / Segment ) { name =>
             get {
-              complete(persistence.getTenantInformation(tenantId))
-            },
-            path("logo") {
-              get {
-                complete(persistence.getLogo(tenantId))
-              }
+              complete(persistence.getTenantByName(name))
             }
-          )
-        }
+          },
+          pathPrefix(Segment) { tenantId =>
+            concat(
+              get {
+                complete(persistence.getTenantInformation(tenantId))
+              },
+              path("logo") {
+                get {
+                  complete(persistence.getLogo(tenantId))
+                }
+              }
+            )
+          }
+        )
       }
     ))
 

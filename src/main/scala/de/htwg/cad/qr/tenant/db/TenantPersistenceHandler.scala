@@ -6,9 +6,10 @@ import de.htwg.cad.qr.tenant.{TenantCreationRequest, TenantInformationFull, Tena
 import scala.concurrent.{ExecutionContext, Future}
 
 trait TenantPersistenceHandler {
-  def getAllTenants: List[TenantInformationShort]
+  def getAllTenants: Future[List[TenantInformationShort]]
   def createTenant(request: TenantCreationRequest): Future[String]
   def getTenantInformation(tenantId: String): Future[TenantInformationFull]
+  def getTenantByName(name: String): Future[TenantInformationFull]
   def getLogo(tenantId: String): Future[String]
 }
 

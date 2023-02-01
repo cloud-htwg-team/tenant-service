@@ -9,11 +9,11 @@ import scala.concurrent.{ExecutionContext, Future}
 private class CloudPersistenceHandler(implicit system: ActorSystem[Nothing], executionContext: ExecutionContext) extends TenantPersistenceHandler {
   private val communication = new MicroserviceCommunicationHandler()
 
-  override def getAllTenants: List[TenantInformationShort] =
-    DatastoreHandler.listTenants()
+  override def getAllTenants: Future[List[TenantInformationShort]] =
+    Future(DatastoreHandler.listTenants())
 
   override def createTenant(request: TenantCreationRequest): Future[String] = {
-    communication.createTenant(request.name)
+    communication.createTenant(request.name, request.premium)
       .flatMap(tenantId => {
         val metaData = Future(DatastoreHandler.saveTenant(request, tenantId))
         val logo = Future(GoogleBucketHandler.uploadObject(tenantId, Base64.getDecoder.decode(request.logo)))
@@ -25,6 +25,11 @@ private class CloudPersistenceHandler(implicit system: ActorSystem[Nothing], exe
     val information = Future(DatastoreHandler.getEntry(tenantId))
     getLogo(tenantId)
       .flatMap(logo => information.map(info => info.withLogo(logo)))
+  }
+
+  override def getTenantByName(name: String): Future[TenantInformationFull] = {
+    Future(DatastoreHandler.getByName(name))
+      .flatMap(info => getLogo(info.tenantId).map(info.withLogo))
   }
 
   override def getLogo(tenantId: String): Future[String] =

@@ -1,5 +1,6 @@
 package de.htwg.cad.qr.tenant.db
 
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter
 import com.google.cloud.datastore._
 import de.htwg.cad.qr.tenant.{TenantCreationRequest, TenantInformationShort}
 
@@ -15,6 +16,7 @@ private object DatastoreHandler {
     val tenantInformation = Entity.newBuilder(taskKey)
       .set("tenantId", id)
       .set("name", request.name)
+      .set("premium", request.premium)
       .build
     datastore.put(tenantInformation)
     id
@@ -29,9 +31,19 @@ private object DatastoreHandler {
     )
   }
 
+  def getByName(name: String): TenantInformationShort = {
+    val query = Query.newEntityQueryBuilder()
+      .setKind(kind)
+      .setFilter(PropertyFilter.eq("name", name))
+      .setLimit(1)
+      .build()
+    collectEntries(query).head
+  }
+
   def listTenants(): List[TenantInformationShort] = {
     val query = Query.newEntityQueryBuilder()
       .setKind(kind)
+      .setFilter(PropertyFilter.eq("premium", false))
       .build()
     collectEntries(query)
   }

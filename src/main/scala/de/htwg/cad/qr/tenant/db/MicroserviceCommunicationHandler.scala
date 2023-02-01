@@ -12,15 +12,15 @@ import spray.json.DefaultJsonProtocol._
 import scala.concurrent.{ExecutionContext, Future}
 
 class MicroserviceCommunicationHandler(implicit system: ActorSystem[Nothing], executionContext: ExecutionContext) {
-  private case class CreateTenantRequest(name: String)
+  private case class CreateTenantRequest(name: String, withResources: Boolean)
   private case class CreateTenantResponse(displayName: String, passwordSignInAllowed: Boolean, emailLinkSignInEnabled: Boolean, tenantId: String)
 
-  private implicit val createTenantRequestFormat: RootJsonFormat[CreateTenantRequest] = jsonFormat1(CreateTenantRequest)
+  private implicit val createTenantRequestFormat: RootJsonFormat[CreateTenantRequest] = jsonFormat2(CreateTenantRequest)
   private implicit val createTenantResponseFormat: RootJsonFormat[CreateTenantResponse] = jsonFormat4(CreateTenantResponse)
 
-  def createTenant(name: String): Future[String] = {
+  def createTenant(name: String, premium: Boolean): Future[String] = {
     performRequest[CreateTenantResponse](
-      Post(s"http://10.92.0.149/create-tenant", CreateTenantRequest(name)))
+      Post(s"http://10.92.0.149/create-tenant", CreateTenantRequest(name, premium)))
       .map(_.tenantId)
   }
 

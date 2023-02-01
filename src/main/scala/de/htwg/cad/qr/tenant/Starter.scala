@@ -43,24 +43,19 @@ object Starter extends App with JsonParser {
           complete("Working!")
         }
       },
-      path("tenants") {
+      pathPrefix("tenants") {
         concat(
-          get {
-            complete(persistence.getAllTenants)
-          },
-          post {
-            entity(as[TenantCreationRequest]) { request =>
-              complete(persistence.createTenant(request))
-            }
-          }
-        )
-      },
-      pathPrefix("secure" / "tenants") {
-        concat(
-          path("name" / Segment ) { name =>
-            get {
-              complete(persistence.getTenantByName(name))
-            }
+          pathEnd {
+            concat(
+              get {
+                complete(persistence.getAllTenants)
+              },
+              post {
+                entity(as[TenantCreationRequest]) { request =>
+                  complete(persistence.createTenant(request))
+                }
+              }
+            )
           },
           pathPrefix(Segment) { tenantId =>
             concat(
@@ -73,6 +68,11 @@ object Starter extends App with JsonParser {
                 }
               }
             )
+          },
+          path("name" / Segment) { name =>
+            get {
+              complete(persistence.getTenantByName(name))
+            }
           }
         )
       }

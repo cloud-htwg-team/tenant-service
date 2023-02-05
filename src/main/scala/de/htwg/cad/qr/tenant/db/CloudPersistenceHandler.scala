@@ -24,12 +24,20 @@ private class CloudPersistenceHandler(implicit system: ActorSystem[Nothing], exe
     communication.createTenant(request.name, request.premium)
       .flatMap(tenantId => {
         val metaData = Future(DatastoreHandler.saveTenant(request, tenantId))
-        val logo = Future(GoogleBucketHandler.uploadObject(tenantId, Base64.getDecoder.decode(request.logo)))
+        val logo = uploadBase64ToBucket(request.logo, tenantId)
         metaData.flatMap(_ => logo).map(_ => {
           println(s"Completed TenantCreationRequest: $tenantId")
           tenantId
         })
       })
+  }
+
+  private def uploadBase64ToBucket(toUpload: String, name: String): Future[Unit] = {
+    val input = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4QCKRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAABJKGAAcAAAAxAAAAUKABAAMAAAABAAEAAKACAAQAAAABAAAEAKADAAQAAAABAAAEAAAAAABBU0NJSQAAADEuMTktMjJCLUg3U0xDNkxIUkMzT05UQ003V0ZDQkFBRFQ0LjAuMi01AP/tADhQaG90b3Nob3AgMy4wADhCSU0EBAAAAAAAADhCSU0EJQAAAAAAENQdjNmPALIE6YAJmOz4Qn7/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAEAAQADASIAAhEBAxEB/8QAHAAAAQUBAQEAAAAAAAAAAAAAAAECAwQGBQcI/8QAQBAAAQMCAgcEBggFBQEBAAAAAQACAwQRBRIGEyExQVFhFCJxsVKBkaHB0TI0QlNykuHwIyVDc/EVJDNigmOy/8QAGgEBAQADAQEAAAAAAAAAAAAAAAEDBQYCBP"
+    val seperated = input.split(",")
+    val content = seperated(1)
+    val fileType = seperated(0).dropWhile(_ != '/').drop(1).takeWhile(_ != ';')
+    Future(GoogleBucketHandler.uploadObject(s"$name.$fileType", Base64.getDecoder.decode(content)))
   }
 
   override def getTenantInformation(tenantId: String)(implicit conversion: RootJsonFormat[TenantInformationFull]): Future[TenantInformationFull] = {
